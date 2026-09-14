@@ -738,12 +738,29 @@ function renderTabs(){
 
 // ---------- Fixture (todos contra todos) ----------
 function generarFixture(torneo){
+  // Método del círculo: arma los cruces por rondas (cada pareja juega
+  // una vez por ronda), lo que da un orden mezclado en vez de ir
+  // pareja por pareja contra todas las demás en secuencia.
+  let arr = torneo.parejas.map(p => p.id);
+  const conBye = arr.length % 2 !== 0;
+  if(conBye) arr.push(null);
+  const total = arr.length;
+  if(total < 2) return [];
+  const rondas = total - 1;
+  const mitad = total / 2;
   const fixture = [];
-  const parejas = torneo.parejas;
-  for(let i=0; i<parejas.length; i++){
-    for(let j=i+1; j<parejas.length; j++){
-      fixture.push({ idA: parejas[i].id, idB: parejas[j].id });
+  for(let r=0; r<rondas; r++){
+    for(let i=0; i<mitad; i++){
+      const idA = arr[i];
+      const idB = arr[total - 1 - i];
+      if(idA !== null && idB !== null){
+        fixture.push({ idA, idB });
+      }
     }
+    const fijo = arr[0];
+    const resto = arr.slice(1);
+    resto.unshift(resto.pop());
+    arr = [fijo, ...resto];
   }
   return fixture;
 }
