@@ -551,6 +551,7 @@
     </div>
     <label>Parejas</label>
     <div id="inputsParejas"></div>
+    <button class="btn-secundario" onclick="importarDelSorteo()" style="width:100%;margin-bottom:8px;">📥 Importar del último sorteo</button>
     <button class="btn-secundario" onclick="agregarInputPareja()" style="width:100%;margin-bottom:12px;">+ Agregar pareja</button>
     <div class="acciones-torneo">
       <button class="btn-secundario" onclick="cerrarModalNuevoTorneo()">Cancelar</button>
@@ -703,6 +704,32 @@ function agregarInputPareja(){
   div.className = 'campo';
   div.innerHTML = `<input type="text" class="input-pareja" placeholder="Pareja ${idx} (ej: Juan / Pedro)">`;
   cont.appendChild(div);
+}
+
+function importarDelSorteo(){
+  let datos = null;
+  try{
+    datos = JSON.parse(localStorage.getItem('sorteo_padel_ultimo_resultado'));
+  }catch(e){ datos = null; }
+
+  if(!datos || !Array.isArray(datos.parejas) || datos.parejas.length === 0){
+    alert('No encontré ningún sorteo guardado. Hacé un sorteo primero en la app Sorteo-Padel y volvé a intentar.');
+    return;
+  }
+
+  const cont = document.getElementById('inputsParejas');
+  cont.innerHTML = '';
+  datos.parejas.forEach((nombre, idx) => {
+    const div = document.createElement('div');
+    div.className = 'campo';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'input-pareja';
+    input.placeholder = `Pareja ${idx + 1}`;
+    input.value = nombre;
+    div.appendChild(input);
+    cont.appendChild(div);
+  });
 }
 
 function cerrarModalNuevoTorneo(){
