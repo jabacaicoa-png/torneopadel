@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Torneo Pádel</title>
+<style>
+  :root{
+    --naranja:#FF6B1A;
+    --amarillo:#FFD93D;
+    --coral:#FF4757;
+    --fondo:#1A0F0A;
+    --panel:#241610;
+    --panel-2:#2E1B12;
+    --borde:#4A2E1E;
+    --texto:#FFF3E8;
+    --texto-tenue:#C9A88F;
+    --verde:#5CC98A;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(255,107,26,0.18), transparent 45%),
+      radial-gradient(circle at 100% 100%, rgba(255,217,61,0.10), transparent 50%),
+      var(--fondo);
+    color:var(--texto);
+    min-height:100vh;
+    padding-bottom:40px;
+  }
+  header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:18px 16px 14px;
+    border-bottom:1px solid var(--borde);
+  }
+  .logo{
+    width:38px;height:38px;flex-shrink:0;
+  }
+  header h1{
+    font-size:1.25rem;
+    margin:0;
+    letter-spacing:0.3px;
+    background:linear-gradient(90deg,var(--amarillo),var(--naranja));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    font-weight:800;
+  }
+  .titulo-fila{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:18px 16px 4px;
+  }
+  .titulo-torneo{
+    font-size:2rem;
+    line-height:1.15;
+    font-weight:800;
+    letter-spacing:-0.3px;
+    color:var(--texto);
+    min-width:0;
+    overflow-wrap:break-word;
+  }
+  .input-titulo-torneo{
+    flex:1;
+    min-width:0;
+    font-size:2rem;
+    line-height:1.15;
+    font-weight:800;
+    letter-spacing:-0.3px;
+    color:var(--texto);
+    background:var(--panel-2);
+    border:1px solid var(--naranja);
+    border-radius:8px;
+    padding:2px 8px;
+  }
+  .btn-editar-titulo{
+    flex-shrink:0;
+    background:var(--panel-2);
+    border:1px solid var(--borde);
+    color:var(--texto-tenue);
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    font-size:0.95rem;
+    padding:0;
+    line-height:1;
+  }
+  .subtitulo-torneo{
+    margin:0 16px 18px;
+    font-size:0.85rem;
+    color:var(--texto-tenue);
+  }
+  .subtitulo-torneo.campeon{
+    color:var(--amarillo);
+    font-weight:700;
+  }
+  main{
+    max-width:640px;
+    margin:0 auto;
+    padding:16px;
+  }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--borde);
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:16px;
+  }
+  .card h2{
+    font-size:0.95rem;
+    margin:0 0 12px;
+    color:var(--amarillo);
+    font-weight:700;
+  }
+  .tabs{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    padding:0 16px 4px;
+    margin-bottom:10px;
+  }
+  .tab{
+    flex-shrink:0;
+    padding:5px 12px;
+    border-radius:14px;
+    background:transparent;
+    border:1px solid var(--borde);
+    color:var(--texto-tenue);
+    font-size:0.72rem;
+    cursor:pointer;
+    white-space:nowrap;
+    font-weight:600;
+  }
+  .tab.activo{
+    background:transparent;
+    color:var(--naranja);
+    border-color:var(--naranja);
+  }
+  .tab.cerrado::after{
+    content:" 🏆";
+  }
+  .segmentado{
+    display:flex;
+    gap:6px;
+    background:var(--panel-2);
+    border:1px solid var(--borde);
+    border-radius:12px;
+    padding:4px;
+    margin-bottom:16px;
+  }
+  .segmento{
+    flex:1;
+    background:transparent;
+    color:var(--texto-tenue);
+    border:none;
+    border-radius:9px;
+    padding:9px 0;
+    font-size:0.85rem;
+    font-weight:700;
+  }
+  .segmento.activo{
+    background:linear-gradient(90deg,var(--naranja),var(--coral));
+    color:#fff;
+  }
+  .reglamento-texto{
+    font-size:0.85rem;
+    line-height:1.5;
+    color:var(--texto);
+    margin:0 0 10px;
+  }
+  .reglamento-lista{
+    margin:0;
+    padding-left:18px;
+    font-size:0.85rem;
+    line-height:1.5;
+    color:var(--texto);
+  }
+  .reglamento-lista li{
+    margin-bottom:8px;
+  }
+  .reglamento-lista li:last-child{
+    margin-bottom:0;
+  }
+  .input-pareja-inline{
+    flex:1;
+    min-width:0;
+    font-size:0.9rem;
+    font-weight:600;
+    padding:6px 8px;
+  }
+  button{
+    font-family:inherit;
+    cursor:pointer;
+    border:none;
+    border-radius:10px;
+    font-weight:700;
+    padding:11px 16px;
+    font-size:0.9rem;
+  }
+  .btn-principal{
+    background:linear-gradient(90deg,var(--naranja),var(--coral));
+    color:#fff;
+    width:100%;
+  }
+  .btn-principal:disabled{
+    opacity:0.4;
+    cursor:not-allowed;
+  }
+  .btn-secundario{
+    background:var(--panel-2);
+    color:var(--texto);
+    border:1px solid var(--borde);
+  }
+  .btn-chico{
+    background:transparent;
+    color:var(--texto-tenue);
+    border:1px solid var(--borde);
+    padding:6px 10px;
+    font-size:0.78rem;
+  }
+  .btn-peligro{
+    background:transparent;
+    color:var(--coral);
+    border:1px solid var(--coral);
+  }
+  input, select{
+    width:100%;
+    background:var(--panel-2);
+    border:1px solid var(--borde);
+    color:var(--texto);
+    padding:10px 12px;
+    border-radius:8px;
+    font-size:0.95rem;
+    font-family:inherit;
+  }
+  input::placeholder{color:var(--texto-tenue);}
+  .fila{
+    display:flex;
+    gap:8px;
+    margin-bottom:8px;
+    align-items:center;
+  }
+  .fila input{flex:1;}
+  label{
+    display:block;
+    font-size:0.78rem;
+    color:var(--texto-tenue);
+    margin-bottom:4px;
+  }
+  .campo{margin-bottom:12px;}
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.82rem;
+  }
+  th, td{
+    padding:8px 6px;
+    text-align:center;
+    border-bottom:1px solid var(--borde);
+  }
+  th{
+    color:var(--texto-tenue);
+    font-weight:600;
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+  }
+  td.pareja{
+    text-align:left;
+    font-weight:700;
+  }
+  tr.puesto-1 td.pareja{color:var(--amarillo);}
+  .fila-tabla-scroll{
+    overflow-x:auto;
+  }
+  .partido-card{
+    background:var(--panel-2);
+    border:1px solid var(--borde);
+    border-radius:12px;
+    padding:12px 14px;
+    margin-bottom:10px;
+  }
+  .equipo-fila{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    padding:7px 0;
+  }
+  .equipo-fila + .equipo-fila{
+    border-top:1px solid var(--borde);
+  }
+  .jugadores{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    min-width:0;
+    flex:1;
+  }
+  .btn-editar-pareja-mini{
+    flex-shrink:0;
+    background:transparent;
+    border:1px solid var(--borde);
+    color:var(--texto-tenue);
+    width:24px;
+    height:24px;
+    border-radius:50%;
+    font-size:0.7rem;
+    padding:0;
+    line-height:1;
+  }
+  .jugador{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:0.85rem;
+    font-weight:600;
+    color:var(--texto);
+  }
+  .jugador span.txt{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .avatar-mini{
+    width:24px;height:24px;
+    border-radius:50%;
+    background:var(--panel);
+    border:1px solid var(--borde);
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.68rem;
+    font-weight:700;
+    color:var(--texto-tenue);
+    flex-shrink:0;
+  }
+  .sets-score{
+    display:flex;
+    gap:16px;
+    flex-shrink:0;
+  }
+  .set-num{
+    width:18px;
+    text-align:center;
+    font-size:1rem;
+    color:var(--texto-tenue);
+    font-weight:500;
+  }
+  .set-num.ganado{
+    color:var(--texto);
+    font-weight:800;
+  }
+  .sets-score-input{
+    display:flex;
+    gap:8px;
+    flex-shrink:0;
+  }
+  .set-inline{
+    width:32px;
+    text-align:center;
+    padding:6px 2px;
+    font-size:0.9rem;
+    border-radius:6px;
+  }
+  .pendiente-badge{
+    text-align:center;
+    color:var(--texto-tenue);
+    font-size:0.75rem;
+    font-style:italic;
+    padding-top:6px;
+    border-top:1px solid var(--borde);
+    margin-top:2px;
+  }
+  .borrar-partido-fila{
+    text-align:right;
+    margin-top:6px;
+  }
+  .vacio{
+    text-align:center;
+    color:var(--texto-tenue);
+    font-size:0.85rem;
+    padding:20px 0;
+  }
+  .campeon-box{
+    text-align:center;
+    padding:20px;
+    background:linear-gradient(135deg, rgba(255,217,61,0.15), rgba(255,107,26,0.10));
+    border:1px solid var(--amarillo);
+    border-radius:12px;
+    margin-bottom:16px;
+  }
+  .campeon-box .trofeo{font-size:2.2rem;}
+  .campeon-box .nombre{
+    font-size:1.3rem;
+    font-weight:800;
+    color:var(--amarillo);
+    margin:6px 0 2px;
+  }
+  .modal-bg{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,0.6);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+    z-index:50;
+  }
+  .modal{
+    background:var(--panel);
+    border:1px solid var(--borde);
+    border-radius:14px;
+    padding:20px;
+    max-width:400px;
+    width:100%;
+    max-height:85vh;
+    overflow-y:auto;
+  }
+  .modal h2{color:var(--amarillo);margin-top:0;}
+  .oculto{display:none !important;}
+  .acciones-torneo{
+    display:flex;
+    gap:8px;
+    margin-top:14px;
+  }
+  .acciones-torneo button{flex:1;}
+</style>
+</head>
+<body>
+
+<header>
+  <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="50" cy="38" rx="30" ry="34" fill="none" stroke="#FFD93D" stroke-width="6"/>
+    <circle cx="38" cy="30" r="3" fill="#FFD93D" opacity="0.6"/>
+    <circle cx="50" cy="26" r="3" fill="#FFD93D" opacity="0.6"/>
+    <circle cx="62" cy="30" r="3" fill="#FFD93D" opacity="0.6"/>
+    <circle cx="34" cy="42" r="3" fill="#FFD93D" opacity="0.6"/>
+    <circle cx="50" cy="40" r="3" fill="#FFD93D" opacity="0.6"/>
+    <circle cx="66" cy="42" r="3" fill="#FFD93D" opacity="0.6"/>
+    <rect x="46" y="70" width="8" height="26" rx="4" fill="#FF6B1A"/>
+  </svg>
+  <h1>TORNEO PÁDEL</h1>
+</header>
+
+<main>
+
+  <div class="titulo-fila">
+    <div class="titulo-torneo" id="tituloTorneoActivo"></div>
+    <input type="text" class="input-titulo-torneo oculto" id="inputTituloTorneo"
+      onkeydown="if(event.key==='Enter') guardarNombreTorneo()">
+    <button class="btn-editar-titulo" id="btnEditarTitulo" onclick="toggleEditarTitulo()" aria-label="Editar nombre del torneo">✎</button>
+  </div>
+  <p class="subtitulo-torneo" id="subtituloTorneoActivo"></p>
+
+  <div id="tabsTorneos" class="tabs"></div>
+
+  <div id="sinTorneos" class="card oculto">
+    <p class="vacio">Todavía no armaste ningún torneo.</p>
+    <button class="btn-principal" onclick="abrirModalNuevoTorneo()">+ Crear torneo</button>
+    <button class="btn-chico" onclick="borrarTodo()" style="width:100%;margin-top:8px;">Borrar todos los datos (reiniciar app)</button>
+  </div>
+
+  <div id="contenidoTorneo" class="oculto">
+
+    <div class="segmentado" id="segmentadoVista">
+      <button class="segmento activo" data-vista="fixture" onclick="cambiarVista('fixture')">Fixture</button>
+      <button class="segmento" data-vista="tabla" onclick="cambiarVista('tabla')">Posiciones</button>
+    </div>
+
+    <div id="vistaFixture">
+      <div class="card">
+        <h2>Fixture</h2>
+        <div id="listaFixture"></div>
+      </div>
+
+      <div class="card" id="cardAgregarPareja">
+        <h2>Agregar pareja al torneo</h2>
+        <div class="fila">
+          <input type="text" id="inputNuevaPareja" placeholder="Ej: Diego / Lucas">
+          <button class="btn-secundario" onclick="agregarParejaATorneo()">Agregar</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Torneo</h2>
+        <div class="acciones-torneo">
+          <button class="btn-secundario" onclick="abrirModalNuevoTorneo()">+ Nuevo torneo</button>
+          <button class="btn-peligro" id="btnCerrarTorneo" onclick="cerrarTorneo()">Cerrar y coronar</button>
+        </div>
+        <button class="btn-peligro" onclick="borrarTorneoActivo()" style="width:100%;margin-top:8px;">Borrar este torneo</button>
+      </div>
+
+      <div class="card">
+        <button class="btn-chico" onclick="borrarTodo()" style="width:100%;">Borrar todos los datos (reiniciar app)</button>
+      </div>
+    </div>
+
+    <div id="vistaTabla" class="oculto">
+      <div class="card">
+        <h2>Tabla de posiciones</h2>
+        <div class="fila-tabla-scroll">
+          <table id="tablaPosiciones"></table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Reglamento</h2>
+        <p class="reglamento-texto">El torneo se juega bajo el sistema de <strong>todos contra todos</strong>.</p>
+        <p class="reglamento-texto">Cada partido se juega al mejor de 3 sets.</p>
+        <p class="reglamento-texto"><strong>Sistema de puntos:</strong> partido ganado, 2 puntos · partido perdido, 1 punto.</p>
+        <p class="reglamento-texto"><strong>Tabla de posiciones:</strong> se ordena de mayor a menor según los puntos acumulados por cada pareja.</p>
+        <p class="reglamento-texto" style="margin-bottom:6px;"><strong>Criterios de desempate</strong>, en este orden:</p>
+        <ol class="reglamento-lista">
+          <li><strong>Cruce directo</strong> — si el empate es entre exactamente dos parejas, clasifica la que le ganó el partido a la otra.</li>
+          <li><strong>Diferencia de sets</strong> — se usa cuando el empate es entre tres parejas o más, o si las dos empatadas todavía no jugaron entre sí.</li>
+          <li><strong>Diferencia de games</strong> — se aplica si el empate persiste luego de comparar la diferencia de sets.</li>
+        </ol>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<!-- Modal nuevo torneo -->
+<div id="modalNuevoTorneo" class="modal-bg oculto">
+  <div class="modal">
+    <h2>Nuevo torneo</h2>
+    <div class="campo">
+      <label>Nombre del torneo</label>
+      <input type="text" id="inputNombreTorneo" placeholder="Ej: Apertura 2026">
+    </div>
+    <label>Parejas</label>
+    <div id="inputsParejas"></div>
+    <button class="btn-secundario" onclick="agregarInputPareja()" style="width:100%;margin-bottom:12px;">+ Agregar pareja</button>
+    <div class="acciones-torneo">
+      <button class="btn-secundario" onclick="cerrarModalNuevoTorneo()">Cancelar</button>
+      <button class="btn-principal" onclick="crearTorneo()">Crear</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'torneos-padel-v1';
+let torneos = [];
+let torneoActivoId = null;
+let vistaActiva = 'fixture';
+
+function cambiarVista(v){
+  vistaActiva = v;
+  actualizarVista();
+}
+
+function actualizarVista(){
+  document.getElementById('vistaFixture').classList.toggle('oculto', vistaActiva !== 'fixture');
+  document.getElementById('vistaTabla').classList.toggle('oculto', vistaActiva !== 'tabla');
+  document.querySelectorAll('#segmentadoVista .segmento').forEach(btn => {
+    btn.classList.toggle('activo', btn.dataset.vista === vistaActiva);
+  });
+}
+
+function cargarDatos(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    torneos = raw ? JSON.parse(raw) : [];
+  }catch(e){ torneos = []; }
+  if(torneos.length > 0){
+    const abierto = torneos.find(t => !t.cerrado);
+    torneoActivoId = abierto ? abierto.id : torneos[torneos.length-1].id;
+  }
+}
+
+function guardarDatos(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(torneos));
+}
+
+function getTorneoActivo(){
+  return torneos.find(t => t.id === torneoActivoId);
+}
+
+function crearParejaId(nombre, idx){
+  return 'p' + idx + '_' + nombre.trim().toLowerCase().replace(/[^a-z0-9]/g,'');
+}
+
+// ---------- Modal nuevo torneo ----------
+function abrirModalNuevoTorneo(){
+  document.getElementById('inputNombreTorneo').value = '';
+  const cont = document.getElementById('inputsParejas');
+  cont.innerHTML = '';
+  for(let i=0; i<5; i++){
+    agregarInputPareja();
+  }
+  document.getElementById('modalNuevoTorneo').classList.remove('oculto');
+}
+
+function agregarInputPareja(){
+  const cont = document.getElementById('inputsParejas');
+  const idx = cont.children.length + 1;
+  const div = document.createElement('div');
+  div.className = 'campo';
+  div.innerHTML = `<input type="text" class="input-pareja" placeholder="Pareja ${idx} (ej: Juan / Pedro)">`;
+  cont.appendChild(div);
+}
+
+function cerrarModalNuevoTorneo(){
+  document.getElementById('modalNuevoTorneo').classList.add('oculto');
+}
+
+function crearTorneo(){
+  const nombre = document.getElementById('inputNombreTorneo').value.trim();
+  if(!nombre){ alert('Poné un nombre para el torneo'); return; }
+  const inputs = Array.from(document.querySelectorAll('.input-pareja'));
+  const nombres = inputs.map(i => i.value.trim()).filter(Boolean);
+  if(nombres.length < 3){ alert('Cargá al menos 3 parejas'); return; }
+
+  const parejas = nombres.map((n, idx) => ({ id: crearParejaId(n, idx), nombre: n }));
+
+  const nuevoTorneo = {
+    id: 't' + Date.now(),
+    nombre,
+    cerrado: false,
+    campeonId: null,
+    parejas,
+    partidos: []
+  };
+  torneos.push(nuevoTorneo);
+  torneoActivoId = nuevoTorneo.id;
+  guardarDatos();
+  cerrarModalNuevoTorneo();
+  render();
+}
+
+// ---------- Tabs ----------
+function render(){
+  renderTabs();
+  const torneo = getTorneoActivo();
+  document.getElementById('sinTorneos').classList.toggle('oculto', torneos.length > 0);
+  document.getElementById('contenidoTorneo').classList.toggle('oculto', !torneo);
+
+  const tituloEl = document.getElementById('tituloTorneoActivo');
+  const subtituloEl = document.getElementById('subtituloTorneoActivo');
+  const inputTituloEl = document.getElementById('inputTituloTorneo');
+  const btnEditarTituloEl = document.getElementById('btnEditarTitulo');
+  editandoTitulo = false;
+  tituloEl.classList.remove('oculto');
+  inputTituloEl.classList.add('oculto');
+  btnEditarTituloEl.textContent = '✎';
+  if(torneo){
+    tituloEl.textContent = torneo.nombre;
+    if(torneo.cerrado && torneo.campeonId){
+      const pareja = torneo.parejas.find(p => p.id === torneo.campeonId);
+      subtituloEl.textContent = '🏆 Campeón: ' + (pareja ? pareja.nombre : '');
+      subtituloEl.classList.add('campeon');
+    } else {
+      subtituloEl.textContent = `${torneo.parejas.length} parejas · ${torneo.partidos.length} partidos jugados`;
+      subtituloEl.classList.remove('campeon');
+    }
+  } else {
+    tituloEl.textContent = '';
+    subtituloEl.textContent = '';
+  }
+
+  document.getElementById('btnEditarTitulo').classList.toggle('oculto', !torneo);
+
+  if(!torneo) return;
+
+  renderFixture(torneo);
+  renderTablaPosiciones(torneo);
+  actualizarVista();
+
+  const btnCerrar = document.getElementById('btnCerrarTorneo');
+  btnCerrar.style.display = torneo.cerrado ? 'none' : 'block';
+
+  document.getElementById('cardAgregarPareja').classList.toggle('oculto', torneo.cerrado);
+}
+
+let editandoTitulo = false;
+
+function toggleEditarTitulo(){
+  const torneo = getTorneoActivo();
+  if(!torneo) return;
+  const tituloEl = document.getElementById('tituloTorneoActivo');
+  const input = document.getElementById('inputTituloTorneo');
+  const btn = document.getElementById('btnEditarTitulo');
+
+  if(!editandoTitulo){
+    editandoTitulo = true;
+    input.value = torneo.nombre;
+    tituloEl.classList.add('oculto');
+    input.classList.remove('oculto');
+    btn.textContent = '✓';
+    input.focus();
+    input.select();
+  } else {
+    guardarNombreTorneo();
+  }
+}
+
+function guardarNombreTorneo(){
+  const torneo = getTorneoActivo();
+  if(!torneo) return;
+  const input = document.getElementById('inputTituloTorneo');
+  const limpio = input.value.trim();
+  if(limpio) torneo.nombre = limpio;
+  editandoTitulo = false;
+  guardarDatos();
+  render();
+}
+
+function agregarParejaATorneo(){
+  const torneo = getTorneoActivo();
+  if(!torneo || torneo.cerrado) return;
+  const input = document.getElementById('inputNuevaPareja');
+  const nombre = input.value.trim();
+  if(!nombre){ alert('Escribí el nombre de la pareja'); return; }
+  const idx = torneo.parejas.length;
+  const nuevaPareja = { id: crearParejaId(nombre, idx) + '_' + Date.now(), nombre };
+  torneo.parejas.push(nuevaPareja);
+  guardarDatos();
+  input.value = '';
+  render();
+}
+
+function renderTabs(){
+  const cont = document.getElementById('tabsTorneos');
+  cont.innerHTML = '';
+  torneos.forEach(t => {
+    const tab = document.createElement('div');
+    tab.className = 'tab' + (t.id === torneoActivoId ? ' activo' : '') + (t.cerrado ? ' cerrado' : '');
+    tab.textContent = t.nombre;
+    tab.onclick = () => { torneoActivoId = t.id; render(); };
+    cont.appendChild(tab);
+  });
+}
+
+// ---------- Fixture (todos contra todos) ----------
+function generarFixture(torneo){
+  const fixture = [];
+  const parejas = torneo.parejas;
+  for(let i=0; i<parejas.length; i++){
+    for(let j=i+1; j<parejas.length; j++){
+      fixture.push({ idA: parejas[i].id, idB: parejas[j].id });
+    }
+  }
+  return fixture;
+}
+
+function buscarPartidoJugado(torneo, idA, idB){
+  return torneo.partidos.find(m =>
+    (m.pareja1 === idA && m.pareja2 === idB) || (m.pareja1 === idB && m.pareja2 === idA)
+  );
+}
+
+function partidosPendientes(torneo){
+  return generarFixture(torneo).filter(f => !buscarPartidoJugado(torneo, f.idA, f.idB));
+}
+
+function separarJugadores(nombrePareja){
+  return nombrePareja.split('/').map(n => n.trim()).filter(Boolean);
+}
+
+function inicial(nombre){
+  return (nombre.trim()[0] || '?').toUpperCase();
+}
+
+function renderEquipoFila(opts){
+  const { nombrePareja, parejaId, ctx, sets, indiceEnPareja, lado } = opts;
+  const jugadores = separarJugadores(nombrePareja);
+  const jugadoresHtml = jugadores.map(j =>
+    `<div class="jugador"><span class="avatar-mini">${inicial(j)}</span><span class="txt">${j}</span></div>`
+  ).join('');
+
+  let scoreHtml = '';
+  if(sets){
+    scoreHtml = '<div class="sets-score">' + sets.map(par => {
+      const propio = par[indiceEnPareja];
+      const rival = par[indiceEnPareja === 0 ? 1 : 0];
+      const gano = propio > rival;
+      return `<div class="set-num${gano ? ' ganado' : ''}">${propio}</div>`;
+    }).join('') + '</div>';
+  } else if(lado){
+    scoreHtml = `<div class="sets-score-input">
+      <input type="number" min="0" max="20" class="set-inline" data-lado="${lado}" data-set="0" inputmode="numeric">
+      <input type="number" min="0" max="20" class="set-inline" data-lado="${lado}" data-set="1" inputmode="numeric">
+      <input type="number" min="0" max="20" class="set-inline" data-lado="${lado}" data-set="2" inputmode="numeric">
+    </div>`;
+  }
+
+  return `<div class="equipo-fila">
+    <div class="jugadores" id="jugadoresBlock_${ctx}">${jugadoresHtml}</div>
+    <input type="text" class="input-pareja-inline oculto" id="inputEditPareja_${ctx}"
+      onkeydown="if(event.key==='Enter') guardarParejaInline('${parejaId}','${ctx}')">
+    <button class="btn-editar-pareja-mini" id="btnEditPareja_${ctx}" onclick="toggleEditarParejaInline('${parejaId}','${ctx}')" aria-label="Editar nombre">✎</button>
+    ${scoreHtml}
+  </div>`;
+}
+
+function toggleEditarParejaInline(parejaId, ctx){
+  const bloque = document.getElementById('jugadoresBlock_' + ctx);
+  const input = document.getElementById('inputEditPareja_' + ctx);
+  const btn = document.getElementById('btnEditPareja_' + ctx);
+
+  if(input.classList.contains('oculto')){
+    const torneo = getTorneoActivo();
+    const pareja = torneo ? torneo.parejas.find(p => p.id === parejaId) : null;
+    input.value = pareja ? pareja.nombre : '';
+    bloque.classList.add('oculto');
+    input.classList.remove('oculto');
+    btn.textContent = '✓';
+    input.focus();
+    input.select();
+  } else {
+    guardarParejaInline(parejaId, ctx);
+  }
+}
+
+function guardarParejaInline(parejaId, ctx){
+  const torneo = getTorneoActivo();
+  if(!torneo) return;
+  const pareja = torneo.parejas.find(p => p.id === parejaId);
+  if(!pareja) return;
+  const input = document.getElementById('inputEditPareja_' + ctx);
+  const limpio = input.value.trim();
+  if(limpio) pareja.nombre = limpio;
+  guardarDatos();
+  render();
+}
+
+function renderFixture(torneo){
+  const cont = document.getElementById('listaFixture');
+  const fixture = generarFixture(torneo);
+  if(fixture.length === 0){
+    cont.innerHTML = '<p class="vacio">Cargá al menos 2 parejas para armar el fixture.</p>';
+    return;
+  }
+  const porNombre = id => (torneo.parejas.find(p => p.id === id) || {}).nombre || '?';
+  let html = '';
+  fixture.forEach(f => {
+    const jugado = buscarPartidoJugado(torneo, f.idA, f.idB);
+    const nombreA = porNombre(f.idA);
+    const nombreB = porNombre(f.idB);
+
+    if(jugado){
+      const idxA = jugado.pareja1 === f.idA ? 0 : 1;
+      const idxB = idxA === 0 ? 1 : 0;
+      html += `<div class="partido-card">
+        ${renderEquipoFila({nombrePareja: nombreA, parejaId: f.idA, ctx: jugado.id+'_A', sets: jugado.sets, indiceEnPareja: idxA})}
+        ${renderEquipoFila({nombrePareja: nombreB, parejaId: f.idB, ctx: jugado.id+'_B', sets: jugado.sets, indiceEnPareja: idxB})}
+        ${torneo.cerrado ? '' : `<div class="borrar-partido-fila"><button class="btn-chico" onclick="borrarPartido('${jugado.id}')">Borrar</button></div>`}
+      </div>`;
+    } else {
+      const contId = 'sets_' + f.idA + '_' + f.idB;
+      html += `<div class="partido-card" id="${contId}">
+        ${renderEquipoFila({nombrePareja: nombreA, parejaId: f.idA, ctx: contId+'_A', lado: torneo.cerrado ? null : 'a'})}
+        ${renderEquipoFila({nombrePareja: nombreB, parejaId: f.idB, ctx: contId+'_B', lado: torneo.cerrado ? null : 'b'})}
+        ${torneo.cerrado
+          ? '<div class="pendiente-badge">Pendiente</div>'
+          : `<button class="btn-principal" style="margin-top:10px;" onclick="guardarPartido('${f.idA}','${f.idB}','${contId}')">Guardar resultado</button>`
+        }
+      </div>`;
+    }
+  });
+  cont.innerHTML = html;
+}
+
+// ---------- Guardar partido ----------
+function guardarPartido(idA, idB, contId){
+  const torneo = getTorneoActivo();
+  if(!torneo || torneo.cerrado) return;
+
+  const cont = document.getElementById(contId);
+  const sets = [];
+  for(let i=0; i<3; i++){
+    const inputA = cont.querySelector(`.set-inline[data-lado="a"][data-set="${i}"]`);
+    const inputB = cont.querySelector(`.set-inline[data-lado="b"][data-set="${i}"]`);
+    const g1 = inputA.value;
+    const g2 = inputB.value;
+    if(g1 === '' && g2 === '') continue;
+    if(g1 === '' || g2 === ''){ alert(`Completá los dos valores del set ${i+1}`); return; }
+    sets.push([parseInt(g1,10), parseInt(g2,10)]);
+  }
+  if(sets.length === 0){ alert('Cargá el resultado de al menos un set'); return; }
+
+  let setsP1 = 0, setsP2 = 0;
+  sets.forEach(([g1,g2]) => { if(g1 > g2) setsP1++; else if(g2 > g1) setsP2++; });
+  if(setsP1 === setsP2){ alert('El partido no puede terminar empatado en sets'); return; }
+
+  const partido = {
+    id: 'm' + Date.now(),
+    pareja1: idA,
+    pareja2: idB,
+    sets,
+    setsP1,
+    setsP2,
+    ganador: setsP1 > setsP2 ? idA : idB
+  };
+  torneo.partidos.push(partido);
+  guardarDatos();
+  render();
+}
+
+function borrarPartido(idPartido){
+  const torneo = getTorneoActivo();
+  if(!torneo || torneo.cerrado) return;
+  if(!confirm('¿Borrar este partido?')) return;
+  torneo.partidos = torneo.partidos.filter(p => p.id !== idPartido);
+  guardarDatos();
+  render();
+}
+
+// ---------- Tabla de posiciones ----------
+function calcularTabla(torneo){
+  const stats = {};
+  torneo.parejas.forEach(p => {
+    stats[p.id] = {
+      id: p.id, nombre: p.nombre,
+      pj:0, pg:0, pp:0,
+      setsGan:0, setsPerd:0,
+      gamesGan:0, gamesPerd:0,
+      puntos:0
+    };
+  });
+
+  torneo.partidos.forEach(m => {
+    const s1 = stats[m.pareja1];
+    const s2 = stats[m.pareja2];
+    if(!s1 || !s2) return;
+    s1.pj++; s2.pj++;
+    s1.setsGan += m.setsP1; s1.setsPerd += m.setsP2;
+    s2.setsGan += m.setsP2; s2.setsPerd += m.setsP1;
+    m.sets.forEach(([g1,g2]) => {
+      s1.gamesGan += g1; s1.gamesPerd += g2;
+      s2.gamesGan += g2; s2.gamesPerd += g1;
+    });
+    if(m.ganador === m.pareja1){
+      s1.pg++; s1.puntos += 2; s2.pp++; s2.puntos += 1;
+    } else {
+      s2.pg++; s2.puntos += 2; s1.pp++; s1.puntos += 1;
+    }
+  });
+
+  const arr = Object.values(stats);
+  arr.forEach(s => {
+    s.difSets = s.setsGan - s.setsPerd;
+    s.difGames = s.gamesGan - s.gamesPerd;
+  });
+
+  // Agrupar por puntos y aplicar desempates en orden de prioridad:
+  // 1) confrontación directa (solo si el empate es entre exactamente 2 parejas)
+  // 2) diferencia de sets
+  // 3) diferencia de games
+  const porPuntos = {};
+  arr.forEach(s => {
+    (porPuntos[s.puntos] = porPuntos[s.puntos] || []).push(s);
+  });
+  const nivelesPuntos = Object.keys(porPuntos).map(Number).sort((a,b) => b - a);
+
+  const resultado = [];
+  nivelesPuntos.forEach(p => {
+    const grupo = porPuntos[p];
+    if(grupo.length === 1){
+      resultado.push(grupo[0]);
+    } else if(grupo.length === 2){
+      const [x, y] = grupo;
+      const partido = buscarPartidoJugado(torneo, x.id, y.id);
+      if(partido){
+        if(partido.ganador === x.id) resultado.push(x, y);
+        else resultado.push(y, x);
+      } else {
+        grupo.sort((a,b) => b.difSets - a.difSets || b.difGames - a.difGames);
+        resultado.push(...grupo);
+      }
+    } else {
+      grupo.sort((a,b) => b.difSets - a.difSets || b.difGames - a.difGames);
+      resultado.push(...grupo);
+    }
+  });
+
+  return resultado;
+}
+
+function renderTablaPosiciones(torneo){
+  const tabla = document.getElementById('tablaPosiciones');
+  const filas = calcularTabla(torneo);
+  let html = `<tr>
+    <th>#</th><th style="text-align:left;">Pareja</th><th>PJ</th><th>PG</th><th>PP</th>
+    <th>Sets</th><th>Dif S</th><th>Games</th><th>Dif G</th><th>Pts</th>
+  </tr>`;
+  filas.forEach((f, idx) => {
+    html += `<tr class="puesto-${idx+1}">
+      <td>${idx+1}</td>
+      <td class="pareja">${f.nombre}</td>
+      <td>${f.pj}</td>
+      <td>${f.pg}</td>
+      <td>${f.pp}</td>
+      <td>${f.setsGan}-${f.setsPerd}</td>
+      <td>${f.difSets>0?'+':''}${f.difSets}</td>
+      <td>${f.gamesGan}-${f.gamesPerd}</td>
+      <td>${f.difGames>0?'+':''}${f.difGames}</td>
+      <td><strong>${f.puntos}</strong></td>
+    </tr>`;
+  });
+  tabla.innerHTML = html;
+}
+
+
+// ---------- Cerrar torneo ----------
+function cerrarTorneo(){
+  const torneo = getTorneoActivo();
+  if(!torneo) return;
+  if(torneo.partidos.length === 0){ alert('Cargá al menos un partido antes de cerrar el torneo'); return; }
+  const tabla = calcularTabla(torneo);
+  const campeon = tabla[0];
+  if(!confirm(`¿Cerrar "${torneo.nombre}" y coronar a ${campeon.nombre} como campeón?`)) return;
+  torneo.cerrado = true;
+  torneo.campeonId = campeon.id;
+  guardarDatos();
+  render();
+}
+
+// ---------- Borrar torneo ----------
+function borrarTorneoActivo(){
+  const torneo = getTorneoActivo();
+  if(!torneo) return;
+  if(!confirm(`¿Borrar el torneo "${torneo.nombre}" y todos sus partidos? Esto no se puede deshacer.`)) return;
+  torneos = torneos.filter(t => t.id !== torneo.id);
+  torneoActivoId = torneos.length > 0 ? torneos[torneos.length - 1].id : null;
+  guardarDatos();
+  render();
+}
+
+function borrarTodo(){
+  if(!confirm('¿Borrar TODOS los torneos y datos guardados? Esto no se puede deshacer.')) return;
+  torneos = [];
+  torneoActivoId = null;
+  guardarDatos();
+  render();
+}
+
+// ---------- Init ----------
+cargarDatos();
+render();
+</script>
+
+</body>
+</html>
