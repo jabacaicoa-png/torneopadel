@@ -642,6 +642,24 @@ async function actualizarDesdeServidor(){
   render();
 }
 
+function hayEdicionEnCurso(){
+  const activo = document.activeElement;
+  if(activo && ['INPUT','SELECT','TEXTAREA'].includes(activo.tagName)) return true;
+  const modal = document.getElementById('modalNuevoTorneo');
+  if(modal && !modal.classList.contains('oculto')) return true;
+  return false;
+}
+
+function actualizarAutomatico(){
+  if(hayEdicionEnCurso()) return;
+  actualizarDesdeServidor();
+}
+
+setInterval(actualizarAutomatico, 15000);
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible') actualizarAutomatico();
+});
+
 function guardarDatos(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(torneos));
   setEstadoSync('Guardando…');
