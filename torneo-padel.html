@@ -505,16 +505,7 @@
 
       <div class="card">
         <h2>Reglamento</h2>
-        <p class="reglamento-texto">El torneo se juega bajo el sistema de <strong>todos contra todos</strong>.</p>
-        <p class="reglamento-texto">Cada partido se juega al mejor de 3 sets.</p>
-        <p class="reglamento-texto"><strong>Sistema de puntos:</strong> partido ganado, 2 puntos · partido perdido, 1 punto.</p>
-        <p class="reglamento-texto"><strong>Tabla de posiciones:</strong> se ordena de mayor a menor según los puntos acumulados por cada pareja.</p>
-        <p class="reglamento-texto" style="margin-bottom:6px;"><strong>Criterios de desempate</strong>, en este orden:</p>
-        <ol class="reglamento-lista">
-          <li><strong>Cruce directo</strong> — si el empate es entre exactamente dos parejas, clasifica la que le ganó el partido a la otra.</li>
-          <li><strong>Diferencia de sets</strong> — se usa cuando el empate es entre tres parejas o más, o si las dos empatadas todavía no jugaron entre sí.</li>
-          <li><strong>Diferencia de games</strong> — se aplica si el empate persiste luego de comparar la diferencia de sets.</li>
-        </ol>
+        <div id="reglamentoTexto"></div>
       </div>
     </div>
 
@@ -529,6 +520,13 @@
     <div class="campo">
       <label>Nombre del torneo</label>
       <input type="text" id="inputNombreTorneo" placeholder="Ej: Apertura 2026">
+    </div>
+    <div class="campo">
+      <label>Formato de partido</label>
+      <select id="selFormatoTorneo">
+        <option value="clasico">Clásico — mejor de 3 sets</option>
+        <option value="rapido">Rápido — 1 set a 4 games, punto de oro</option>
+      </select>
     </div>
     <label>Parejas</label>
     <div id="inputsParejas"></div>
@@ -585,6 +583,7 @@ function crearParejaId(nombre, idx){
 // ---------- Modal nuevo torneo ----------
 function abrirModalNuevoTorneo(){
   document.getElementById('inputNombreTorneo').value = '';
+  document.getElementById('selFormatoTorneo').value = 'clasico';
   const cont = document.getElementById('inputsParejas');
   cont.innerHTML = '';
   for(let i=0; i<5; i++){
@@ -609,6 +608,7 @@ function cerrarModalNuevoTorneo(){
 function crearTorneo(){
   const nombre = document.getElementById('inputNombreTorneo').value.trim();
   if(!nombre){ alert('Poné un nombre para el torneo'); return; }
+  const formato = document.getElementById('selFormatoTorneo').value === 'rapido' ? 'rapido' : 'clasico';
   const inputs = Array.from(document.querySelectorAll('.input-pareja'));
   const nombres = inputs.map(i => i.value.trim()).filter(Boolean);
   if(nombres.length < 3){ alert('Cargá al menos 3 parejas'); return; }
@@ -618,6 +618,7 @@ function crearTorneo(){
   const nuevoTorneo = {
     id: 't' + Date.now(),
     nombre,
+    formato,
     cerrado: false,
     campeonId: null,
     parejas,
@@ -652,7 +653,8 @@ function render(){
       subtituloEl.textContent = '🏆 Campeón: ' + (pareja ? pareja.nombre : '');
       subtituloEl.classList.add('campeon');
     } else {
-      subtituloEl.textContent = `${torneo.parejas.length} parejas · ${torneo.partidos.length} partidos jugados`;
+      const etiquetaFormato = getFormato(torneo) === 'rapido' ? 'Rápido' : 'Clásico';
+      subtituloEl.textContent = `${torneo.parejas.length} parejas · ${torneo.partidos.length} partidos jugados · ${etiquetaFormato}`;
       subtituloEl.classList.remove('campeon');
     }
   } else {
@@ -666,6 +668,7 @@ function render(){
 
   renderFixture(torneo);
   renderTablaPosiciones(torneo);
+  renderReglamento(torneo);
   actualizarVista();
 
   const btnCerrar = document.getElementById('btnCerrarTorneo');
@@ -764,7 +767,7 @@ function inicial(nombre){
 }
 
 function renderEquipoFila(opts){
-  const { nombrePareja, parejaId, ctx, sets, indiceEnPareja, lado } = opts;
+  const { nombrePareja, parejaId, ctx, sets, indiceEnPareja, lado, numSets } = opts;
   const jugadores = separarJugadores(nombrePareja);
   const jugadoresHtml = jugadores.map(j =>
     `<div class="jugador"><span class="avatar-mini">${inicial(j)}</span><span class="txt">${j}</span></div>`
@@ -779,11 +782,11 @@ function renderEquipoFila(opts){
       return `<div class="set-num${gano ? ' ganado' : ''}">${propio}</div>`;
     }).join('') + '</div>';
   } else if(lado){
-    scoreHtml = `<div class="sets-score-input">
-      <input type="number" min="0" max="20" class="set-inline" data-lado="${lado}" data-set="0" inputmode="numeric">
-      <input type="number" min="0" max="20" class="set-inline" data-lado="${lado}" data-set="1" inputmode="numeric">
-      <input type="number" min="0" max="20" class="set-inline" data-lado="${lado}" data-set="2" inputmode="numeric">
-    </div>`;
+    let inputs = '';
+    for(let i=0; i<(numSets || 3); i++){
+      inputs += `<input type="number" min="0" max="20" class="set-inline" data-lado="${lado}" data-set="${i}" inputmode="numeric">`;
+    }
+    scoreHtml = `<div class="sets-score-input">${inputs}</div>`;
   }
 
   return `<div class="equipo-fila">
@@ -833,6 +836,7 @@ function renderFixture(torneo){
     cont.innerHTML = '<p class="vacio">Cargá al menos 2 parejas para armar el fixture.</p>';
     return;
   }
+  const numSets = getFormato(torneo) === 'rapido' ? 1 : 3;
   const porNombre = id => (torneo.parejas.find(p => p.id === id) || {}).nombre || '?';
   let html = '';
   fixture.forEach(f => {
@@ -851,8 +855,8 @@ function renderFixture(torneo){
     } else {
       const contId = 'sets_' + f.idA + '_' + f.idB;
       html += `<div class="partido-card" id="${contId}">
-        ${renderEquipoFila({nombrePareja: nombreA, parejaId: f.idA, ctx: contId+'_A', lado: torneo.cerrado ? null : 'a'})}
-        ${renderEquipoFila({nombrePareja: nombreB, parejaId: f.idB, ctx: contId+'_B', lado: torneo.cerrado ? null : 'b'})}
+        ${renderEquipoFila({nombrePareja: nombreA, parejaId: f.idA, ctx: contId+'_A', lado: torneo.cerrado ? null : 'a', numSets})}
+        ${renderEquipoFila({nombrePareja: nombreB, parejaId: f.idB, ctx: contId+'_B', lado: torneo.cerrado ? null : 'b', numSets})}
         ${torneo.cerrado
           ? '<div class="pendiente-badge">Pendiente</div>'
           : `<button class="btn-principal" style="margin-top:10px;" onclick="guardarPartido('${f.idA}','${f.idB}','${contId}')">Guardar resultado</button>`
@@ -869,8 +873,9 @@ function guardarPartido(idA, idB, contId){
   if(!torneo || torneo.cerrado) return;
 
   const cont = document.getElementById(contId);
+  const numSets = getFormato(torneo) === 'rapido' ? 1 : 3;
   const sets = [];
-  for(let i=0; i<3; i++){
+  for(let i=0; i<numSets; i++){
     const inputA = cont.querySelector(`.set-inline[data-lado="a"][data-set="${i}"]`);
     const inputB = cont.querySelector(`.set-inline[data-lado="b"][data-set="${i}"]`);
     const g1 = inputA.value;
@@ -909,7 +914,42 @@ function borrarPartido(idPartido){
 }
 
 // ---------- Tabla de posiciones ----------
+function getFormato(torneo){
+  return torneo.formato === 'rapido' ? 'rapido' : 'clasico';
+}
+
+function renderReglamento(torneo){
+  const cont = document.getElementById('reglamentoTexto');
+  if(getFormato(torneo) === 'rapido'){
+    cont.innerHTML = `
+      <p class="reglamento-texto">El torneo se juega bajo el sistema de <strong>todos contra todos</strong>.</p>
+      <p class="reglamento-texto"><strong>Formato rápido:</strong> cada partido se juega a un set de <strong>4 games</strong>, con <strong>punto de oro</strong> en 40-40 (no hay ventaja).</p>
+      <p class="reglamento-texto"><strong>Sistema de puntos:</strong> partido ganado, 1 punto · partido perdido, 0 puntos · si se pierde 0-4 (sin ganar ningún game), resta 1 punto.</p>
+      <p class="reglamento-texto"><strong>Tabla de posiciones:</strong> se ordena de mayor a menor según los puntos acumulados por cada pareja.</p>
+      <p class="reglamento-texto" style="margin-bottom:6px;"><strong>Criterios de desempate</strong>, en este orden:</p>
+      <ol class="reglamento-lista">
+        <li><strong>Cruce directo</strong> — si el empate es entre exactamente dos parejas, clasifica la que le ganó el partido a la otra.</li>
+        <li><strong>Diferencia de games</strong> — se usa cuando el empate es entre tres parejas o más, o si las dos empatadas todavía no jugaron entre sí.</li>
+      </ol>
+    `;
+  } else {
+    cont.innerHTML = `
+      <p class="reglamento-texto">El torneo se juega bajo el sistema de <strong>todos contra todos</strong>.</p>
+      <p class="reglamento-texto">Cada partido se juega al mejor de 3 sets.</p>
+      <p class="reglamento-texto"><strong>Sistema de puntos:</strong> partido ganado, 2 puntos · partido perdido, 1 punto.</p>
+      <p class="reglamento-texto"><strong>Tabla de posiciones:</strong> se ordena de mayor a menor según los puntos acumulados por cada pareja.</p>
+      <p class="reglamento-texto" style="margin-bottom:6px;"><strong>Criterios de desempate</strong>, en este orden:</p>
+      <ol class="reglamento-lista">
+        <li><strong>Cruce directo</strong> — si el empate es entre exactamente dos parejas, clasifica la que le ganó el partido a la otra.</li>
+        <li><strong>Diferencia de sets</strong> — se usa cuando el empate es entre tres parejas o más, o si las dos empatadas todavía no jugaron entre sí.</li>
+        <li><strong>Diferencia de games</strong> — se aplica si el empate persiste luego de comparar la diferencia de sets.</li>
+      </ol>
+    `;
+  }
+}
+
 function calcularTabla(torneo){
+  const formato = getFormato(torneo);
   const stats = {};
   torneo.parejas.forEach(p => {
     stats[p.id] = {
@@ -932,10 +972,25 @@ function calcularTabla(torneo){
       s1.gamesGan += g1; s1.gamesPerd += g2;
       s2.gamesGan += g2; s2.gamesPerd += g1;
     });
-    if(m.ganador === m.pareja1){
-      s1.pg++; s1.puntos += 2; s2.pp++; s2.puntos += 1;
+
+    if(formato === 'rapido'){
+      // Ganado: 1 punto. Perdido: 0 puntos, salvo perder 0-4 (sin ganar ningún game): -1 punto.
+      const gamesM_p1 = m.sets.reduce((acc,[g1]) => acc + g1, 0);
+      const gamesM_p2 = m.sets.reduce((acc,[,g2]) => acc + g2, 0);
+      if(m.ganador === m.pareja1){
+        s1.pg++; s1.puntos += 1; s2.pp++;
+        s2.puntos += (gamesM_p2 === 0) ? -1 : 0;
+      } else {
+        s2.pg++; s2.puntos += 1; s1.pp++;
+        s1.puntos += (gamesM_p1 === 0) ? -1 : 0;
+      }
     } else {
-      s2.pg++; s2.puntos += 2; s1.pp++; s1.puntos += 1;
+      // Clásico: Ganado 2 puntos, Perdido 1 punto.
+      if(m.ganador === m.pareja1){
+        s1.pg++; s1.puntos += 2; s2.pp++; s2.puntos += 1;
+      } else {
+        s2.pg++; s2.puntos += 2; s1.pp++; s1.puntos += 1;
+      }
     }
   });
 
@@ -947,13 +1002,17 @@ function calcularTabla(torneo){
 
   // Agrupar por puntos y aplicar desempates en orden de prioridad:
   // 1) confrontación directa (solo si el empate es entre exactamente 2 parejas)
-  // 2) diferencia de sets
-  // 3) diferencia de games
+  // 2) diferencia de sets (formato clásico) / diferencia de games (formato rápido)
+  // 3) diferencia de games (formato clásico, si persiste el empate en sets)
   const porPuntos = {};
   arr.forEach(s => {
     (porPuntos[s.puntos] = porPuntos[s.puntos] || []).push(s);
   });
   const nivelesPuntos = Object.keys(porPuntos).map(Number).sort((a,b) => b - a);
+
+  const ordenarPorEstadisticas = formato === 'rapido'
+    ? (a,b) => b.difGames - a.difGames
+    : (a,b) => b.difSets - a.difSets || b.difGames - a.difGames;
 
   const resultado = [];
   nivelesPuntos.forEach(p => {
@@ -967,11 +1026,11 @@ function calcularTabla(torneo){
         if(partido.ganador === x.id) resultado.push(x, y);
         else resultado.push(y, x);
       } else {
-        grupo.sort((a,b) => b.difSets - a.difSets || b.difGames - a.difGames);
+        grupo.sort(ordenarPorEstadisticas);
         resultado.push(...grupo);
       }
     } else {
-      grupo.sort((a,b) => b.difSets - a.difSets || b.difGames - a.difGames);
+      grupo.sort(ordenarPorEstadisticas);
       resultado.push(...grupo);
     }
   });
