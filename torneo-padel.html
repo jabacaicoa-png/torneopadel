@@ -48,6 +48,9 @@
     background-clip:text;
     color:transparent;
     font-weight:800;
+    flex:1;
+    min-width:0;
+    overflow-wrap:break-word;
   }
   .titulo-fila{
     display:flex;
@@ -439,7 +442,7 @@
     <circle cx="66" cy="42" r="3" fill="#FFD93D" opacity="0.6"/>
     <rect x="46" y="70" width="8" height="26" rx="4" fill="#FF6B1A"/>
   </svg>
-  <h1>TORNEO PÁDEL</h1>
+  <h1 id="tituloHeader">TORNEO PÁDEL</h1>
 </header>
 
 <main>
@@ -646,8 +649,10 @@ function render(){
   tituloEl.classList.remove('oculto');
   inputTituloEl.classList.add('oculto');
   btnEditarTituloEl.textContent = '✎';
+  const tituloHeaderEl = document.getElementById('tituloHeader');
   if(torneo){
     tituloEl.textContent = torneo.nombre;
+    tituloHeaderEl.textContent = 'TORNEO PÁDEL ' + torneo.nombre.toUpperCase();
     if(torneo.cerrado && torneo.campeonId){
       const pareja = torneo.parejas.find(p => p.id === torneo.campeonId);
       subtituloEl.textContent = '🏆 Campeón: ' + (pareja ? pareja.nombre : '');
@@ -660,6 +665,7 @@ function render(){
   } else {
     tituloEl.textContent = '';
     subtituloEl.textContent = '';
+    tituloHeaderEl.textContent = 'TORNEO PÁDEL';
   }
 
   document.getElementById('btnEditarTitulo').classList.toggle('oculto', !torneo);
