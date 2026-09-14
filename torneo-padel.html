@@ -169,6 +169,18 @@
     background:linear-gradient(90deg,var(--naranja),var(--coral));
     color:#fff;
   }
+  .fila-sync{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    padding:0 0 14px;
+    font-size:0.75rem;
+    color:var(--texto-tenue);
+  }
+  .fila-sync .btn-chico{
+    flex-shrink:0;
+  }
   .reglamento-texto{
     font-size:0.85rem;
     line-height:1.5;
@@ -457,6 +469,11 @@
 
   <div id="tabsTorneos" class="tabs"></div>
 
+  <div class="fila-sync">
+    <span id="estadoSync">Cargando…</span>
+    <button class="btn-chico" onclick="actualizarDesdeServidor()">🔄 Actualizar</button>
+  </div>
+
   <div id="sinTorneos" class="card oculto">
     <p class="vacio">Todavía no armaste ningún torneo.</p>
     <button class="btn-principal" onclick="abrirModalNuevoTorneo()">+ Crear torneo</button>
@@ -543,6 +560,7 @@
 
 <script>
 const STORAGE_KEY = 'torneos-padel-v1';
+const API_URL = 'https://script.google.com/macros/s/AKfycbx9W6dWVz-sVBnHgSj_cwUpLP-d0mSVXS0wycKvRvgUh5Arm5z7GM1kOAjnkyc__VQedw/exec';
 let torneos = [];
 let torneoActivoId = null;
 let vistaActiva = 'fixture';
@@ -560,19 +578,83 @@ function actualizarVista(){
   });
 }
 
-function cargarDatos(){
+function setEstadoSync(texto){
+  const el = document.getElementById('estadoSync');
+  if(el) el.textContent = texto;
+}
+
+function cargarDatosLocal(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
     torneos = raw ? JSON.parse(raw) : [];
   }catch(e){ torneos = []; }
+}
+
+function fijarTorneoActivoInicial(){
   if(torneos.length > 0){
-    const abierto = torneos.find(t => !t.cerrado);
-    torneoActivoId = abierto ? abierto.id : torneos[torneos.length-1].id;
+    const existeActivo = torneos.some(t => t.id === torneoActivoId);
+    if(!existeActivo){
+      const abierto = torneos.find(t => !t.cerrado);
+      torneoActivoId = abierto ? abierto.id : torneos[torneos.length-1].id;
+    }
+  } else {
+    torneoActivoId = null;
   }
+}
+
+async function cargarDatos(){
+  cargarDatosLocal();
+  fijarTorneoActivoInicial();
+  setEstadoSync('Cargando datos compartidos…');
+  try{
+    const resp = await fetch(API_URL);
+    if(!resp.ok) throw new Error('respuesta no OK');
+    const datos = await resp.json();
+    if(Array.isArray(datos)){
+      torneos = datos;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(torneos));
+      fijarTorneoActivoInicial();
+      setEstadoSync('✓ Sincronizado');
+    } else {
+      setEstadoSync('⚠ Usando datos guardados en este celular');
+    }
+  }catch(e){
+    setEstadoSync('⚠ Sin conexión — usando datos guardados en este celular');
+  }
+  render();
+}
+
+async function actualizarDesdeServidor(){
+  setEstadoSync('Actualizando…');
+  try{
+    const resp = await fetch(API_URL);
+    if(!resp.ok) throw new Error('respuesta no OK');
+    const datos = await resp.json();
+    if(Array.isArray(datos)){
+      torneos = datos;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(torneos));
+      fijarTorneoActivoInicial();
+      setEstadoSync('✓ Sincronizado');
+    }
+  }catch(e){
+    setEstadoSync('⚠ Sin conexión al actualizar');
+  }
+  render();
 }
 
 function guardarDatos(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(torneos));
+  setEstadoSync('Guardando…');
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(torneos)
+  }).then(resp => {
+    if(!resp.ok) throw new Error('respuesta no OK');
+    setEstadoSync('✓ Sincronizado');
+  }).catch(() => {
+    setEstadoSync('⚠ No se pudo guardar en el servidor — se guardó solo en este celular');
+  });
 }
 
 function getTorneoActivo(){
@@ -1120,8 +1202,10 @@ function borrarTodo(){
 }
 
 // ---------- Init ----------
-cargarDatos();
+cargarDatosLocal();
+fijarTorneoActivoInicial();
 render();
+cargarDatos();
 </script>
 
 </body>
